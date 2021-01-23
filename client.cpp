@@ -24,8 +24,8 @@ void setup()
       Serial.println("init failed");
 
     rf95.setFrequency(frequency);
-    rf95.setModemConfig(RH_RF95::Bw125Cr45Sf2048);
-    rf95.setTxPower(20, false);
+    rf95.setModemConfig(RH_RF95::Bw125Cr48Sf4096);
+    rf95.setTxPower(23, false);
 }
 
 void loop()
