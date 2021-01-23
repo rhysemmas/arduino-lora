@@ -25,7 +25,7 @@ void setup()
 
     rf95.setFrequency(frequency);
     rf95.setModemConfig(RH_RF95::Bw125Cr48Sf4096);
-    rf95.setTxPower(23, false);
+    rf95.setTxPower(20, false);
 }
 
 void loop()
