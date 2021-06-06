@@ -2,6 +2,11 @@
 #include <SPI.h>
 #include <RH_RF95.h>
 
+#include "route.h"
+#include "packet.h"
+
+// TODO: how to store funcs in other files and import them here?
+
 // Singleton instance of the radio driver
 RH_RF95 rf95;
 
@@ -21,28 +26,6 @@ const uint8_t HOP = 0b0000010;
 uint8_t FROM = 2; // Neighbour from
 uint8_t TO = 1; // Neighbour to
 
-// Can we dynamically size the array based on the message we're sending
-// - set a header which the receiver reads to decide how long the buffer will be
-#define buffer_size RH_RF95_MAX_MESSAGE_LEN // Max message size: 251
-
-struct __attribute__((__packed__)) headers {
-  uint8_t recipient; // Final recipient
-  uint8_t sender; // Original sender
-  uint8_t hops; // Hop counter
-  uint16_t last_rssi;
-};
-
-struct __attribute__((__packed__)) data {
-  char message[(buffer_size-sizeof(struct headers)-1)];
-};
-
-// Route table struct
-struct __attribute__((__packed__)) route {
-  uint8_t node; // Who we can talk to
-  uint8_t neighbour; // RF95 from
-  uint8_t hops_to_sender;
-  int16_t neighbour_rssi;
-};
 
 void setup() {
   Serial.begin(9600);
@@ -77,7 +60,6 @@ void sendMessage(char* message) {
   //printf("message size: %lu\n", sizeof(d.message));
 
   // The buffer we will be writing bytes into
-  //unsigned char outBuf[sizeof(h.recipient)+sizeof(h.sender)+sizeof(h.hops)+sizeof(h.last_rssi)+sizeof(message)];
   unsigned char outBuf[buffer_size];
 
   // A pointer we will advance whenever we write data
@@ -134,24 +116,7 @@ void checkForMessages() {
 
     if (rf95.recv(buf, &len)) {
       digitalWrite(led, HIGH);
-
-      // Serialize single byte variables into outBuf
-      memcpy(&h.recipient, p, sizeof(h.recipient));
-      p += sizeof(h.recipient);
-      memcpy(&h.sender, p, sizeof(h.sender));
-      p += sizeof(h.sender);
-      memcpy(&h.hops, p, sizeof(h.hops));
-      p += sizeof(h.hops);
-
-      // Serialize our multibyte int into outBuf
-      uint16_t host = ntohs(h.last_rssi);
-      memcpy(&host, p, sizeof(host));
-      p += sizeof(host);
-
-      // Serialize our message into outBuf
-      memcpy(&d.message, p, sizeof(d.message));
-      p += sizeof(d.message);
-
+      readPacket(p, h, d);
       digitalWrite(led, LOW);
 
       Serial.print(F("Message received: "));
@@ -181,8 +146,6 @@ void waitForACK() {
     Serial.println(F("No reply"));
   }
 }
-
-void updateRoutingTable(uint8_t) {}
 
 void loop() {
   // Enter listen mode
