@@ -18,8 +18,8 @@ const uint8_t HOP = 0b0000010;
 //const uint8_t FRG = 0b0001000;
 
 // RF95 headers
-uint8_t FROM = 1; // Neighbour from
-uint8_t TO = 2; // Neighbour to
+uint8_t FROM = 2; // Neighbour from
+uint8_t TO = 1; // Neighbour to
 
 // Can we dynamically size the array based on the message we're sending
 // - set a header which the receiver reads to decide how long the buffer will be
@@ -48,7 +48,7 @@ void setup() {
   Serial.begin(9600);
   while (!Serial); // Wait for serial port to be available
   if (!rf95.init()) {
-    Serial.println("Init failed");
+    Serial.println(F("Init failed"));
   }
 
   rf95.setFrequency(frequency);
@@ -62,7 +62,7 @@ void setup() {
   rf95.setThisAddress(FROM);
   rf95.setPromiscuous(true);
 
-  Serial.print("Max message length: ");
+  Serial.print(F("Max message length: "));
   Serial.println(rf95.maxMessageLength());
 }
 
@@ -74,9 +74,10 @@ void sendMessage(char* message) {
 
   struct data d;
   strcpy(d.message, message);
-  printf("message size: %lu\n", sizeof(d.message));
+  //printf("message size: %lu\n", sizeof(d.message));
 
   // The buffer we will be writing bytes into
+  //unsigned char outBuf[sizeof(h.recipient)+sizeof(h.sender)+sizeof(h.hops)+sizeof(h.last_rssi)+sizeof(message)];
   unsigned char outBuf[buffer_size];
 
   // A pointer we will advance whenever we write data
@@ -89,17 +90,19 @@ void sendMessage(char* message) {
   p += sizeof(h.sender);
   memcpy(p, &h.hops, sizeof(h.hops));
   p += sizeof(h.hops);
-  memcpy(p, &d.message, sizeof(d.message));
-  p += sizeof(d.message);
 
   // Serialize our multibyte int into outBuf
   uint16_t net = htons(h.last_rssi);
   memcpy(p, &net, sizeof(net));
-  p += sizeof(h.last_rssi);
+  p += sizeof(net);
 
-  Serial.println("Waiting for channel to clear");
+  // Serialize message into outBuf
+  memcpy(p, &d.message, sizeof(d.message));
+  p += sizeof(d.message);
+
+  Serial.println(F("Waiting for channel to clear"));
   if (rf95.waitCAD()) {
-    Serial.print("Sending message: ");
+    Serial.print(F("Sending message: "));
     Serial.println(message);
 
     rf95.send((const uint8_t*)outBuf, sizeof(outBuf));
@@ -109,7 +112,7 @@ void sendMessage(char* message) {
 
 void sendACK(char* ACKMessage, int messageSize) {
   if (rf95.waitCAD()) {
-    Serial.println("Sending ACK");
+    Serial.println(F("Sending ACK"));
 
     rf95.setHeaderFlags(ACK);
     sendMessage(ACKMessage);
@@ -124,10 +127,14 @@ void checkForMessages() {
     struct headers h;
     struct data d;
     unsigned char buf[buffer_size];
+    unsigned char len = sizeof(buf);
     unsigned char * p = buf;
 
-    if (rf95.recv(buf, sizeof(buf))) {
+    Serial.println(F("Message available"));
+
+    if (rf95.recv(buf, &len)) {
       digitalWrite(led, HIGH);
+
       // Serialize single byte variables into outBuf
       memcpy(&h.recipient, p, sizeof(h.recipient));
       p += sizeof(h.recipient);
@@ -135,17 +142,19 @@ void checkForMessages() {
       p += sizeof(h.sender);
       memcpy(&h.hops, p, sizeof(h.hops));
       p += sizeof(h.hops);
+
+      // Serialize our multibyte int into outBuf
+      uint16_t host = ntohs(h.last_rssi);
+      memcpy(&host, p, sizeof(host));
+      p += sizeof(host);
+
+      // Serialize our message into outBuf
       memcpy(&d.message, p, sizeof(d.message));
       p += sizeof(d.message);
 
-      // // Serialize our multibyte int into outBuf
-      // uint16_t host = ntohs(h.last_rssi);
-      // memcpy(&h.last_rssi, p, sizeof(h.last_rssi));
-      // p += sizeof(h.last_rssi);
-
       digitalWrite(led, LOW);
 
-      Serial.print("Message received: ");
+      Serial.print(F("Message received: "));
       Serial.println(d.message);
 
       // Convert headers back to struct and update routing table - or do this as part of routing table update
@@ -159,7 +168,7 @@ void checkForMessages() {
     }
     else
     {
-      Serial.println("recv failed");
+      Serial.println(F("recv function failed"));
     }
   }
 }
@@ -169,7 +178,7 @@ void waitForACK() {
     checkForMessages();
   }
   else {
-    Serial.println("No reply");
+    Serial.println(F("No reply"));
   }
 }
 
