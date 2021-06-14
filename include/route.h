@@ -8,4 +8,4 @@ struct __attribute__((__packed__)) route {
   int16_t neighbour_rssi;
 };
 
-void updateRoutingTable(uint8_t);
+void UpdateRoutingTable(uint8_t);

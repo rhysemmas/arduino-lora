@@ -1,19 +1,18 @@
 #include <Arduino.h>
 #include <RH_RF95.h>
 
-// Can we dynamically size the array based on the message we're sending
-// - set a header which the receiver reads to decide how long the buffer will be
-#define buffer_size RH_RF95_MAX_MESSAGE_LEN // Max message size: 251
-
-struct __attribute__((__packed__)) headers {
+struct __attribute__((__packed__)) Headers {
   uint8_t recipient; // Final recipient
   uint8_t sender; // Original sender
   uint8_t hops; // Hop counter
   uint16_t last_rssi;
 };
 
-struct __attribute__((__packed__)) data {
-  char message[(buffer_size-sizeof(struct headers)-1)];
+// Need to do dynamically sized data, so we dont have to send massive packets
+struct __attribute__((__packed__)) Data {
+  char message[(RH_RF95_MAX_MESSAGE_LEN-sizeof(struct Headers)-1)];
 };
 
-void readPacket(unsigned char* p, headers h, data d);
+void ReadPacket(unsigned char* p, Headers h, Data d);
+
+void WritePacket(unsigned char* p, Headers h, Data d);

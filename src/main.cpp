@@ -5,8 +5,6 @@
 #include "route.h"
 #include "packet.h"
 
-// TODO: how to store funcs in other files and import them here?
-
 // Singleton instance of the radio driver
 RH_RF95 rf95;
 
@@ -25,7 +23,6 @@ const uint8_t HOP = 0b0000010;
 // RF95 headers
 uint8_t FROM = 2; // Neighbour from
 uint8_t TO = 1; // Neighbour to
-
 
 void setup() {
   Serial.begin(9600);
@@ -50,45 +47,27 @@ void setup() {
 }
 
 void sendMessage(char* message) {
-  struct headers h;
+  struct Headers h;
   h.recipient = TO;
   h.sender = FROM;
   h.hops = 0;
 
-  struct data d;
+  struct Data d;
   strcpy(d.message, message);
-  //printf("message size: %lu\n", sizeof(d.message));
 
-  // The buffer we will be writing bytes into
-  unsigned char outBuf[buffer_size];
-
-  // A pointer we will advance whenever we write data
+  unsigned char outBuf[RH_RF95_MAX_MESSAGE_LEN];
   unsigned char* p = outBuf;
-
-  // Serialize single byte variables into outBuf
-  memcpy(p, &h.recipient, sizeof(h.recipient));
-  p += sizeof(h.recipient);
-  memcpy(p, &h.sender, sizeof(h.sender));
-  p += sizeof(h.sender);
-  memcpy(p, &h.hops, sizeof(h.hops));
-  p += sizeof(h.hops);
-
-  // Serialize our multibyte int into outBuf
-  uint16_t net = htons(h.last_rssi);
-  memcpy(p, &net, sizeof(net));
-  p += sizeof(net);
-
-  // Serialize message into outBuf
-  memcpy(p, &d.message, sizeof(d.message));
-  p += sizeof(d.message);
+  WritePacket(p, h, d);
 
   Serial.println(F("Waiting for channel to clear"));
   if (rf95.waitCAD()) {
+    digitalWrite(led, HIGH);
     Serial.print(F("Sending message: "));
     Serial.println(message);
 
     rf95.send((const uint8_t*)outBuf, sizeof(outBuf));
     rf95.waitPacketSent();
+    digitalWrite(led, LOW);
   }
 }
 
@@ -106,9 +85,9 @@ void sendACK(char* ACKMessage, int messageSize) {
 
 void checkForMessages() {
   if (rf95.available()) {
-    struct headers h;
-    struct data d;
-    unsigned char buf[buffer_size];
+    struct Headers h;
+    struct Data d;
+    unsigned char buf[RH_RF95_MAX_MESSAGE_LEN];
     unsigned char len = sizeof(buf);
     unsigned char * p = buf;
 
@@ -116,11 +95,10 @@ void checkForMessages() {
 
     if (rf95.recv(buf, &len)) {
       digitalWrite(led, HIGH);
-      readPacket(p, h, d);
-      digitalWrite(led, LOW);
-
+      ReadPacket(p, h, d);
       Serial.print(F("Message received: "));
       Serial.println(d.message);
+      digitalWrite(led, LOW);
 
       // Convert headers back to struct and update routing table - or do this as part of routing table update
       //updateRoutingTable(headers);
@@ -149,6 +127,8 @@ void waitForACK() {
 
 void loop() {
   // Enter listen mode
+  // TODO: we need to listen for messages (in a thread?) and when we get one,
+  // we need to send an ACK along with any other information.
   checkForMessages();
 
   // If we have a message in our serial buffer, enter sending mode
@@ -159,6 +139,8 @@ void loop() {
     char message[data.length()];
     data.toCharArray(message, sizeof(message));
 
+    // TODO: when we have a message to send, we need to send it and then keep
+    // track of it being sent and wait for a reply (ACK) so we know it was received
     sendMessage(message);
     // Wait for an ACK from our message
     waitForACK();
