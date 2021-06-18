@@ -22,6 +22,8 @@ struct __attribute__((__packed__)) Packet {
   Data data;
 };
 
+Packet NewPacket(const char* message, int to, int from, int hops);
+
 void ReadPacket(unsigned char* p, Packet pkt);
 
 void WritePacket(unsigned char* p, Packet pkt);

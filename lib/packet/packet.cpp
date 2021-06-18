@@ -1,5 +1,15 @@
 #include "packet.h"
 
+Packet NewPacket(const char* message, int to, int from, int hops) {
+  struct Packet pkt;
+  pkt.headers.recipient = to;
+  pkt.headers.sender = from;
+  pkt.headers.hops = hops;
+
+  strcpy(pkt.data.message, message);
+  return pkt;
+}
+
 void ReadPacket(unsigned char* p, Packet pkt) {
   // Serialize single byte variables into headers struct
   memcpy(&pkt.headers.recipient, p, sizeof(pkt.headers.recipient));

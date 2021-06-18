@@ -1,3 +1,3 @@
 #include "route.h"
 
-void UpdateRoutingTable(uint8_t) {}
+void updateRoutingTable(uint8_t) {}
