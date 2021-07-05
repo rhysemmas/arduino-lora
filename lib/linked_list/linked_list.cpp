@@ -35,18 +35,28 @@ void linked_list::delete_node(Packet pkt) {
   node *del_node;
   del_node = head;
 
+  if (head == tail) {
+    delete del_node;
+    head = NULL;
+    tail = NULL;
+    count--;
+    return;
+  }
+
+  // looping problem must be happening here?
   while(del_node->next != nullptr) {
+    Serial.println(F("in linked list loop"));
     // messages need IDs or Packet needs isEqual func/operator
     if (del_node->packet.data.message == pkt.data.message) {
+      Serial.println(F("found node to delete"));
       node *prev_node;
       prev_node = del_node->prev;
       prev_node->next = del_node->next;
-      delete del_node;
 
+      delete del_node;
       count--;
       return;
     }
-
     del_node = del_node->next;
   }
 }
