@@ -1,16 +1,17 @@
-#include <queue.h>
+#include <linked_list.h>
 
 class handle {
-  RH_RF95 rf95;
-  queue *in;
-  queue *out;
+  private:
+    RH_RF95 *rf95;
+    linked_list *in;
+    linked_list *out;
 
-public:
-    handle(RH_RF95 driver);
+  public:
+    handle();
     ~handle();
 
-    bool receive();
-    void read();
-    bool schedule(Packet pkt);
+    void receive();
     void send();
+    bool read();
+    bool schedule(Packet pkt);
 };
