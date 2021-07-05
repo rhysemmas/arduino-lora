@@ -13,7 +13,7 @@ struct __attribute__((__packed__)) Headers {
 };
 
 struct __attribute__((__packed__)) Data {
-  char message[(RH_RF95_MAX_MESSAGE_LEN-sizeof(struct Headers)-1)];
+  char message[(64-sizeof(struct Headers)-1)];
 };
 
 // Need to do dynamically sized data, so we dont have to send massive packets
