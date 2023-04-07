@@ -18,6 +18,13 @@ The project uses [PlatformIO](https://docs.platformio.org/en/latest/integration/
 
 * [PlatformIO Core](https://docs.platformio.org/en/latest/core/index.html#piocore)
 
+#### Emacs Setup
+
+* Follow [PlatformIO Instructions](https://docs.platformio.org/en/latest/integration/ide/emacs.html#integration)
+* `pio project init --ide emacs`
+* Install ccls
+* TODO: fix - have to manually enter `platformio-mode` from editor to get build command
+
 ### Running
 
 Note: each node needs its ID flashing to it, this is changed in `main.cpp` manually right now (sorry)
