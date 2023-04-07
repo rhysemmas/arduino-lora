@@ -14,21 +14,12 @@ TODO - links
 
 ### Prerequisites
 
-* [arduino-cli](https://arduino.github.io/arduino-cli/0.32/installation/)
-  * arduino:avr - `arduino-cli core install arduino:avr`
+The project uses [PlatformIO](https://docs.platformio.org/en/latest/integration/ide/index.html) which comes with a GUI/mode for making building and uploading sketches in your favourite IDE easier.
 
-### Run
+* [PlatformIO Core](https://docs.platformio.org/en/latest/core/index.html#piocore)
+
+### Running
 
 Note: each node needs its ID flashing to it, this is changed in `main.cpp` manually right now (sorry)
 
-Build Sketch:
-`arduino-cli compile -b arduino:avr:uno`
-
-Find Board:
-`arduino-cli board list`
-
-Upload Sketch:
-`arduino-cli upload -b aruidno:avr:uno -p /dev/ttyACM0`
-
-Open Monitor:
-`arduino-cli monitor -p /dev/ttyACM0`
+PlatformIO includes tools to build and upload code to the Arduino Uno. You can also use it to open a serial monitor to the device from the CLI with `pio device monitor` 
