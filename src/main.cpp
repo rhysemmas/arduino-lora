@@ -1,9 +1,9 @@
 #include <Arduino.h>
-#include <SPI.h>
 #include <RH_RF95.h>
+#include <SPI.h>
 
-#include "route.h"
 #include "packet.h"
+#include "route.h"
 
 // Singleton instance of the radio driver
 RH_RF95 rf95;
@@ -17,16 +17,17 @@ uint8_t led = LED_BUILTIN;
 // Packet flag consts - 4 bits to work with
 const uint8_t ACK = 0b0000001;
 const uint8_t HOP = 0b0000010;
-//const uint8_t RTR = 0b0000100;
-//const uint8_t FRG = 0b0001000;
+// const uint8_t RTR = 0b0000100;
+// const uint8_t FRG = 0b0001000;
 
 // RF95 headers
 uint8_t FROM = 2; // Neighbour from
-uint8_t TO = 1; // Neighbour to
+uint8_t TO = 1;   // Neighbour to
 
 void setup() {
   Serial.begin(9600);
-  while (!Serial); // Wait for serial port to be available
+  while (!Serial)
+    ; // Wait for serial port to be available
   if (!rf95.init()) {
     Serial.println(F("Init failed"));
   }
@@ -35,8 +36,9 @@ void setup() {
   rf95.setModemConfig(RH_RF95::Bw125Cr48Sf4096);
   rf95.setTxPower(13, false);
 
-  // Not sure how this is meant to work, when set the radio never detects the channel as clear
-  //rf95.setCADTimeout(10000);
+  // Not sure how this is meant to work, when set the radio never detects the
+  // channel as clear
+  // rf95.setCADTimeout(10000);
   rf95.setHeaderTo(TO);
   rf95.setHeaderFrom(FROM);
   rf95.setThisAddress(FROM);
@@ -46,7 +48,7 @@ void setup() {
   Serial.println(rf95.maxMessageLength());
 }
 
-void sendMessage(char* message) {
+void sendMessage(char *message) {
   struct Headers h;
   h.recipient = TO;
   h.sender = FROM;
@@ -56,7 +58,7 @@ void sendMessage(char* message) {
   strcpy(d.message, message);
 
   unsigned char outBuf[RH_RF95_MAX_MESSAGE_LEN];
-  unsigned char* p = outBuf;
+  unsigned char *p = outBuf;
   WritePacket(p, h, d);
 
   Serial.println(F("Waiting for channel to clear"));
@@ -65,13 +67,13 @@ void sendMessage(char* message) {
     Serial.print(F("Sending message: "));
     Serial.println(message);
 
-    rf95.send((const uint8_t*)outBuf, sizeof(outBuf));
+    rf95.send((const uint8_t *)outBuf, sizeof(outBuf));
     rf95.waitPacketSent();
     digitalWrite(led, LOW);
   }
 }
 
-void sendACK(char* ACKMessage, int messageSize) {
+void sendACK(char *ACKMessage, int messageSize) {
   if (rf95.waitCAD()) {
     Serial.println(F("Sending ACK"));
 
@@ -89,7 +91,7 @@ void checkForMessages() {
     struct Data d;
     unsigned char buf[RH_RF95_MAX_MESSAGE_LEN];
     unsigned char len = sizeof(buf);
-    unsigned char * p = buf;
+    unsigned char *p = buf;
 
     Serial.println(F("Message available"));
 
@@ -100,17 +102,16 @@ void checkForMessages() {
       Serial.println(d.message);
       digitalWrite(led, LOW);
 
-      // Convert headers back to struct and update routing table - or do this as part of routing table update
-      //updateRoutingTable(headers);
+      // Convert headers back to struct and update routing table - or do this as
+      // part of routing table update
+      // updateRoutingTable(headers);
 
       // Send an ACK if we have not received an ACK
       if (rf95.headerFlags() != 1) {
         char ACKMessage[] = "ACK";
         sendACK(ACKMessage, sizeof(ACKMessage));
       }
-    }
-    else
-    {
+    } else {
       Serial.println(F("recv function failed"));
     }
   }
@@ -119,8 +120,7 @@ void checkForMessages() {
 void waitForACK() {
   if (rf95.waitAvailableTimeout(30000)) {
     checkForMessages();
-  }
-  else {
+  } else {
     Serial.println(F("No reply"));
   }
 }
@@ -140,7 +140,8 @@ void loop() {
     data.toCharArray(message, sizeof(message));
 
     // TODO: when we have a message to send, we need to send it and then keep
-    // track of it being sent and wait for a reply (ACK) so we know it was received
+    // track of it being sent and wait for a reply (ACK) so we know it was
+    // received
     sendMessage(message);
     // Wait for an ACK from our message
     waitForACK();
