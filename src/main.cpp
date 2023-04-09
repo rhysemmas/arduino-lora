@@ -21,8 +21,8 @@ const uint8_t HOP = 0b0000010;
 // const uint8_t FRG = 0b0001000;
 
 // RF95 headers
-uint8_t FROM = 2; // Neighbour from
-uint8_t TO = 1;   // Neighbour to
+uint8_t FROM = 1; // Neighbour from
+uint8_t TO = 2;   // Neighbour to
 
 void setup() {
   Serial.begin(9600);
@@ -49,13 +49,13 @@ void setup() {
 }
 
 void sendMessage(char *message) {
-  struct Headers h;
-  h.recipient = TO;
-  h.sender = FROM;
-  h.hops = 0;
+  Headers *h = new Headers();
+  h->recipient = TO;
+  h->sender = FROM;
+  h->hops = 0;
 
-  struct Data d;
-  strcpy(d.message, message);
+  Data *d = new Data;
+  strcpy(d->message, message);
 
   unsigned char outBuf[RH_RF95_MAX_MESSAGE_LEN];
   unsigned char *p = outBuf;
@@ -71,6 +71,9 @@ void sendMessage(char *message) {
     rf95.waitPacketSent();
     digitalWrite(led, LOW);
   }
+
+  delete (h);
+  delete (d);
 }
 
 void sendACK(char *ACKMessage, int messageSize) {
@@ -87,8 +90,9 @@ void sendACK(char *ACKMessage, int messageSize) {
 
 void checkForMessages() {
   if (rf95.available()) {
-    struct Headers h;
-    struct Data d;
+    Headers *h = new Headers();
+    Data *d = new Data;
+
     unsigned char buf[RH_RF95_MAX_MESSAGE_LEN];
     unsigned char len = sizeof(buf);
     unsigned char *p = buf;
@@ -99,7 +103,7 @@ void checkForMessages() {
       digitalWrite(led, HIGH);
       ReadPacket(p, h, d);
       Serial.print(F("Message received: "));
-      Serial.println(d.message);
+      Serial.println(d->message);
       digitalWrite(led, LOW);
 
       // Convert headers back to struct and update routing table - or do this as
@@ -114,6 +118,9 @@ void checkForMessages() {
     } else {
       Serial.println(F("recv function failed"));
     }
+
+    delete (h);
+    delete (d);
   }
 }
 
