@@ -32,11 +32,13 @@ void setup() {
   Serial.println(rf95.maxMessageLength());
 }
 
-void sendMessage(uint8_t *message) {
+void sendMessage(uint8_t (&message)[RH_RF95_MAX_MESSAGE_LEN]) {
   Serial.print("Sending message: ");
   Serial.println((char *)message);
+  Serial.print("Size: ");
+  Serial.println(sizeof(message));
 
-  rf95.send(message, sizeof(*message));
+  rf95.send(message, sizeof(message));
   rf95.waitPacketSent();
 
   // Now wait for a reply
