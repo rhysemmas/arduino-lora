@@ -32,15 +32,15 @@ void setup() {
   Serial.println(rf95.maxMessageLength());
 }
 
-void sendMessage(char *message) {
-  Serial.println("Sending to rf95_server");
-  // Send a message to rf95_server
-  uint8_t data[] = "Hello World!";
-  rf95.send(data, sizeof(data));
+void sendMessage(uint8_t *message) {
+  Serial.print("Sending message: ");
+  Serial.println((char *)message);
+
+  rf95.send(message, sizeof(*message));
   rf95.waitPacketSent();
 
   // Now wait for a reply
-  uint8_t buf[RH_RF95_MAX_MESSAGE_LEN];
+  uint8_t buf[RH_RF95_MAX_MESSAGE_LEN] = {0};
   uint8_t len = sizeof(buf);
 
   if (rf95.waitAvailableTimeout(3000)) {
@@ -48,8 +48,6 @@ void sendMessage(char *message) {
     if (rf95.recv(buf, &len)) {
       Serial.print("got reply: ");
       Serial.println((char *)buf);
-      //      Serial.print("RSSI: ");
-      //      Serial.println(rf95.lastRssi(), DEC);
     } else {
       Serial.println("recv failed");
     }
@@ -61,15 +59,16 @@ void sendMessage(char *message) {
 void checkForMessages() {
   if (rf95.available()) {
     // Should be a message for us now
-    uint8_t buf[RH_RF95_MAX_MESSAGE_LEN];
+    uint8_t buf[RH_RF95_MAX_MESSAGE_LEN] = {0};
     uint8_t len = sizeof(buf);
     if (rf95.recv(buf, &len)) {
       digitalWrite(led, HIGH);
-      //      RH_RF95::printBuffer("request: ", buf, len);
+
+      // debug
+      RH_RF95::printBuffer("request: ", buf, len);
+
       Serial.print("got request: ");
       Serial.println((char *)buf);
-      //      Serial.print("RSSI: ");
-      //      Serial.println(rf95.lastRssi(), DEC);
 
       // Send a reply
       uint8_t data[] = "And hello back to you";
@@ -87,13 +86,14 @@ void loop() {
   checkForMessages();
 
   // If we have a message in our serial buffer, enter sending mode
-  String data;
-  data = Serial.readString();
+  uint8_t buffer[RH_RF95_MAX_MESSAGE_LEN] = {0};
+  size_t bufSize = 0;
+  bufSize = Serial.readBytes(buffer, sizeof(buffer));
 
-  if (data.length() > 0) {
-    char message[data.length()];
-    data.toCharArray(message, sizeof(message));
+  if (bufSize > 0) {
+    Serial.print("read bytes: ");
+    Serial.println((char *)buffer);
 
-    sendMessage(message);
+    sendMessage(buffer);
   }
 }
