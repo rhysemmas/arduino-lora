@@ -96,6 +96,9 @@ void loop() {
     Serial.print("read bytes: ");
     Serial.println((char *)buffer);
 
+    Serial.print("num bytes read: ");
+    Serial.println(bufSize);
+
     sendMessage(buffer);
   }
 }
