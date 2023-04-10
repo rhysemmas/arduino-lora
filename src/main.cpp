@@ -32,13 +32,17 @@ void setup() {
   Serial.println(rf95.maxMessageLength());
 }
 
-void sendMessage(uint8_t (&message)[RH_RF95_MAX_MESSAGE_LEN]) {
-  Serial.print("Sending message: ");
-  Serial.println((char *)message);
-  Serial.print("Size: ");
-  Serial.println(sizeof(message));
+void sendMessage(uint8_t *message, size_t messageLen) {
+  uint8_t data[messageLen];
+  memcpy(data, message, messageLen);
 
-  rf95.send(message, sizeof(message));
+  Serial.print("sending message: ");
+  for (uint8_t i = 0; i < messageLen; i++) {
+    Serial.print((char)data[i]);
+  }
+  Serial.println();
+
+  rf95.send(data, sizeof(data));
   rf95.waitPacketSent();
 
   // Now wait for a reply
@@ -73,7 +77,7 @@ void checkForMessages() {
       Serial.println((char *)buf);
 
       // Send a reply
-      uint8_t data[] = "And hello back to you";
+      uint8_t data[] = "hi tired, im dad";
       rf95.send(data, sizeof(data));
       rf95.waitPacketSent();
       Serial.println("Sent a reply");
@@ -99,6 +103,6 @@ void loop() {
     Serial.print("num bytes read: ");
     Serial.println(bufSize);
 
-    sendMessage(buffer);
+    sendMessage(buffer, bufSize);
   }
 }
