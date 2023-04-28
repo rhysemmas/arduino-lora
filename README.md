@@ -2,7 +2,7 @@
 
 LoRa radio mesh using Arduino microcontrollers.
 
-## Project TODOs 1
+## Project TODOs
 
 * Packet structure/building/marshalling
 * MAC - CSMA/CA
