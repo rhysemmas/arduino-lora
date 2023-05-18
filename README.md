@@ -1,4 +1,4 @@
-# Arduino LoRa
+# Arduino LoRa 1
 
 LoRa radio mesh using Arduino microcontrollers.
 
