@@ -77,10 +77,11 @@ void checkForMessages() {
       Serial.println((char *)buf);
 
       // Send a reply
-      uint8_t rbuf[] = "you said: ";
-      uint8_t reply[len + sizeof(rbuf)];
+      uint8_t rbuf[] = "you said";
+      uint8_t reply[len + sizeof(rbuf) + 1];
 
       strcpy((char *)reply, (char *)rbuf);
+      strcat((char *)reply, ":");
       strcpy((char *)reply, (char *)buf);
 
       rf95.send(reply, sizeof(reply));
