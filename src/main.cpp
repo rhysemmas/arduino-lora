@@ -77,8 +77,13 @@ void checkForMessages() {
       Serial.println((char *)buf);
 
       // Send a reply
-      uint8_t data[] = "hi tired, im dad";
-      rf95.send(data, sizeof(data));
+      uint8_t rbuf[] = "you said: ";
+      uint8_t reply[len + sizeof(rbuf)];
+
+      strcpy((char *)reply, (char *)rbuf);
+      strcpy((char *)reply, (char *)buf);
+
+      rf95.send(reply, sizeof(reply));
       rf95.waitPacketSent();
       Serial.println("Sent a reply");
       digitalWrite(led, LOW);
