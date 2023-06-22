@@ -55,7 +55,10 @@ void sendMessage(uint8_t *message, size_t messageLen) {
       Serial.print(F("got reply: "));
       Serial.println((char *)buf);
 
-      Serial.print(F("signal strength: "));
+      Serial.print(F("rssi"));
+      Serial.println(rf95.lastSNR());
+
+      Serial.print(F("snr: "));
       Serial.println(rf95.lastSNR());
     } else {
       Serial.println(F("recv failed"));
@@ -79,7 +82,10 @@ void checkForMessages() {
       Serial.print(F("got request: "));
       Serial.println((char *)buf);
 
-      Serial.print(F("signal strength: "));
+      Serial.print(F("rssi: "));
+      Serial.println(rf95.lastRssi());
+
+      Serial.print(F("snr: "));
       Serial.println(rf95.lastSNR());
 
       // Send a reply
