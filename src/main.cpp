@@ -55,7 +55,7 @@ void sendMessage(uint8_t *message, size_t messageLen) {
       Serial.print(F("got reply: "));
       Serial.println((char *)buf);
 
-      Serial.print(F("rssi"));
+      Serial.print(F("rssi: "));
       Serial.println(rf95.lastSNR());
 
       Serial.print(F("snr: "));
