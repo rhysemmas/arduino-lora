@@ -23,7 +23,7 @@ void setup() {
   rf95.setFrequency(frequency);
   rf95.setModemConfig(RH_RF95::Bw125Cr48Sf4096);
   // rf95.setModemConfig(RH_RF95::Bw500Cr45Sf128);
-  rf95.setTxPower(13, false);
+  rf95.setTxPower(23, false);
 
   // rf95.setCADTimeout(10000);
   rf95.setPromiscuous(true);
@@ -49,7 +49,7 @@ void sendMessage(uint8_t *message, size_t messageLen) {
   uint8_t buf[RH_RF95_MAX_MESSAGE_LEN] = {0};
   uint8_t len = sizeof(buf);
 
-  if (rf95.waitAvailableTimeout(3000)) {
+  if (rf95.waitAvailableTimeout(10000)) {
     // Should be a reply message for us now
     if (rf95.recv(buf, &len)) {
       Serial.print("got reply: ");
