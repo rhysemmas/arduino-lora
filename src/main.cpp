@@ -17,7 +17,7 @@ void setup() {
     ; // Wait for serial port to be available
 
   if (!rf95.init()) {
-    Serial.println(F("Init failed"));
+    Serial.println(F("init failed"));
   }
 
   rf95.setFrequency(frequency);
@@ -28,7 +28,7 @@ void setup() {
   // rf95.setCADTimeout(10000);
   rf95.setPromiscuous(true);
 
-  Serial.print(F("Max message length: "));
+  Serial.print(F("max message length: "));
   Serial.println(rf95.maxMessageLength());
 }
 
@@ -36,7 +36,7 @@ void sendMessage(uint8_t *message, size_t messageLen) {
   uint8_t data[messageLen];
   memcpy(data, message, messageLen);
 
-  Serial.print("sending message: ");
+  Serial.print(F("sending message: "));
   for (uint8_t i = 0; i < messageLen; i++) {
     Serial.print((char)data[i]);
   }
@@ -52,13 +52,16 @@ void sendMessage(uint8_t *message, size_t messageLen) {
   if (rf95.waitAvailableTimeout(10000)) {
     // Should be a reply message for us now
     if (rf95.recv(buf, &len)) {
-      Serial.print("got reply: ");
+      Serial.print(F("got reply: "));
       Serial.println((char *)buf);
+
+      Serial.print(F("signal strength: "));
+      Serial.println(rf95.lastSNR());
     } else {
-      Serial.println("recv failed");
+      Serial.println(F("recv failed"));
     }
   } else {
-    Serial.println("No reply, is rf95_server running?");
+    Serial.println(F("no reply, is anyone there?"));
   }
 }
 
@@ -71,10 +74,13 @@ void checkForMessages() {
       digitalWrite(led, HIGH);
 
       // debug
-      RH_RF95::printBuffer("request: ", buf, len);
+      // RH_RF95::printBuffer("request: ", buf, len);
 
-      Serial.print("got request: ");
+      Serial.print(F("got request: "));
       Serial.println((char *)buf);
+
+      Serial.print(F("signal strength: "));
+      Serial.println(rf95.lastSNR());
 
       // Send a reply
       uint8_t reply[len + 20];
@@ -84,10 +90,10 @@ void checkForMessages() {
 
       rf95.send(reply, sizeof(reply));
       rf95.waitPacketSent();
-      Serial.println("Sent a reply");
+      Serial.println(F("sent a reply"));
       digitalWrite(led, LOW);
     } else {
-      Serial.println("recv failed");
+      Serial.println(F("recv failed"));
     }
   }
 }
@@ -101,10 +107,10 @@ void loop() {
   bufSize = Serial.readBytes(buffer, sizeof(buffer));
 
   if (bufSize > 0) {
-    Serial.print("read bytes: ");
+    Serial.print(F("read bytes: "));
     Serial.println((char *)buffer);
 
-    Serial.print("num bytes read: ");
+    Serial.print(F("num bytes read: "));
     Serial.println(bufSize);
 
     sendMessage(buffer, bufSize);
