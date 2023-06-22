@@ -21,8 +21,8 @@ void setup() {
   }
 
   rf95.setFrequency(frequency);
-  // rf95.setModemConfig(RH_RF95::Bw125Cr48Sf4096);
-  rf95.setModemConfig(RH_RF95::Bw500Cr45Sf128);
+  rf95.setModemConfig(RH_RF95::Bw125Cr48Sf4096);
+  // rf95.setModemConfig(RH_RF95::Bw500Cr45Sf128);
   rf95.setTxPower(13, false);
 
   // rf95.setCADTimeout(10000);
