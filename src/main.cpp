@@ -55,16 +55,16 @@ void send(uint8_t *message, size_t messageLen) {
   digitalWrite(led, LOW);
 }
 
-boolean receive(uint8_t *buf, uint8_t len) {
+boolean receive(uint8_t *buf, uint8_t *len) {
   if (rf95.available()) {
-    if (rf95.recv(buf, &len)) {
+    if (rf95.recv(buf, len)) {
       digitalWrite(led, HIGH);
 
       Serial.print(F("got message: "));
       Serial.println((char *)buf);
 
       Serial.print(F("size of message: "));
-      Serial.println(len);
+      Serial.println(*len);
 
       Serial.print(F("rssi: "));
       Serial.println(rf95.lastRssi());
@@ -84,8 +84,7 @@ boolean receive(uint8_t *buf, uint8_t len) {
 
 void waitForReply() {
   uint8_t *buf = (uint8_t *)malloc(sizeof(uint8_t *) * RH_RF95_MAX_MESSAGE_LEN);
-  uint8_t len;
-  len = sizeof(buf);
+  uint8_t *len = (uint8_t *)malloc(sizeof(uint8_t *));
 
   if (rf95.waitAvailableTimeout(10000)) {
     receive(buf, len);
@@ -94,15 +93,15 @@ void waitForReply() {
   }
 
   free(buf);
+  free(len);
 }
 
 void checkForMessages() {
   uint8_t *buf = (uint8_t *)malloc(sizeof(uint8_t *) * RH_RF95_MAX_MESSAGE_LEN);
-  uint8_t len;
-  len = sizeof(buf);
+  uint8_t *len = (uint8_t *)malloc(sizeof(uint8_t *));
 
   if (receive(buf, len)) {
-    uint8_t reply[len + 7];
+    uint8_t reply[*len + 7];
     strcpy((char *)reply, (char *)buf);
     strcat((char *)reply, " - no u");
 
@@ -110,6 +109,7 @@ void checkForMessages() {
   }
 
   free(buf);
+  free(len);
 }
 
 void loop() {
