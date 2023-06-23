@@ -93,6 +93,9 @@ void waitForReply() {
   uint8_t *buf = (uint8_t *)malloc(sizeof(uint8_t) * RH_RF95_MAX_MESSAGE_LEN);
   uint8_t *len = (uint8_t *)malloc(sizeof(uint8_t));
 
+  memset(buf, 0, sizeof(uint8_t) * RH_RF95_MAX_MESSAGE_LEN);
+  memset(len, 0, sizeof(uint8_t));
+
   if (rf95.waitAvailableTimeout(10000)) {
     receive(buf, len);
   } else {
@@ -104,6 +107,9 @@ void checkForMessages() {
   uint8_t *buf = (uint8_t *)malloc(sizeof(uint8_t) * RH_RF95_MAX_MESSAGE_LEN);
   uint8_t *len = (uint8_t *)malloc(sizeof(uint8_t));
 
+  memset(buf, 0, sizeof(uint8_t) * RH_RF95_MAX_MESSAGE_LEN);
+  memset(len, 0, sizeof(uint8_t));
+
   if (receive(buf, len)) {
     uint8_t reply[*len + 7];
     strcpy((char *)reply, (char *)buf);
@@ -111,6 +117,9 @@ void checkForMessages() {
 
     send(reply, sizeof(reply));
   }
+
+  free(buf);
+  free(len);
 }
 
 void loop() {
