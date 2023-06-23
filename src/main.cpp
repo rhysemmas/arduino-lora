@@ -22,17 +22,25 @@ void setup() {
 
   rf95.setFrequency(frequency);
   rf95.setTxPower(20);
-  // rf95.setModemConfig(RH_RF95::Bw125Cr48Sf4096);
+  rf95.setPreambleLength(10);
+  rf95.setSpreadingFactor(12);
+  rf95.setSignalBandwidth(62500);
+  rf95.setCodingRate4(8);
+  rf95.setLowDatarate();
+  rf95.setPayloadCRC(false);
 
-  RH_RF95::ModemConfig modem_config = {
-      0x78, // Reg 0x1D: BW=125kHz, Coding=4/8, Header=explicit
-      0xc4, // Reg 0x1E: Spread=4096chips/symbol, CRC=enable
-      0x0c  // Reg 0x26: LowDataRate=On, Agc=On
-  };
-  rf95.setModemRegisters(&modem_config);
+  // if one feels like setting the registers manually:
+  // https://cdn.sparkfun.com/assets/learn_tutorials/8/0/4/RFM95_96_97_98W.pdf
+  // e.g,
+  // RH_RF95::ModemConfig modem_config = {
+  //     0xc6, // Reg 0x1D: BW=62.5khz, Coding=4/8, Header=implicit
+  //     0xc4, // Reg 0x1E: Spread=4096chips/symbol, CRC=enable
+  //     0x0c  // Reg 0x26: LowDataRate=On, Agc=On
+  // };
+  // rf95.setModemRegisters(&modem_config);
 
-  // rf95.setCADTimeout(10000);
   rf95.setPromiscuous(true);
+  // rf95.setCADTimeout(10000);
 
   Serial.print(F("max message length: "));
   Serial.println(rf95.maxMessageLength());
