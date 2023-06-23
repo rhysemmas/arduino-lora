@@ -87,12 +87,15 @@ boolean receive(uint8_t *buf, uint8_t *len) {
 }
 
 void waitForReply() {
+  Serial.print(F("allocating size for buffer: "));
+  Serial.println(sizeof(uint8_t) * RH_RF95_MAX_MESSAGE_LEN);
+
   uint8_t *buf = (uint8_t *)malloc(sizeof(uint8_t) * RH_RF95_MAX_MESSAGE_LEN);
   uint8_t *len = (uint8_t *)malloc(sizeof(uint8_t));
 
   if (rf95.waitAvailableTimeout(10000)) {
-    receive(buf, len);
     rf95.printBuffer("wait for reply buffer: ", buf, *len);
+    receive(buf, len);
   } else {
     Serial.println(F("no reply, is anyone there?"));
   }
