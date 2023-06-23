@@ -21,16 +21,8 @@ void setup() {
   }
 
   rf95.setFrequency(frequency);
-  rf95.setTxPower(20);
-
-  // modem config resources:
-  // https://cdn.sparkfun.com/assets/learn_tutorials/8/0/4/RFM95_96_97_98W.pdf
-  // https://medium.com/home-wireless/testing-lora-radios-with-the-limesdr-mini-part-2-37fa481217ff
-  // rf95.setModemConfig(RH_RF95::Bw125Cr48Sf4096);
-  const RH_RF95::ModemConfig myProfile = {RH_RF95_BW_62_5KHZ |
-                                              RH_RF95_CODING_RATE_4_8,
-                                          RH_RF95_SPREADING_FACTOR_4096CPS};
-  rf95.setModemRegisters(&myProfile);
+  rf95.setTxPower(23);
+  rf95.setModemConfig(RH_RF95::Bw125Cr48Sf4096);
   rf95.setLowDatarate();
   rf95.setPromiscuous(true);
   // rf95.setCADTimeout(10000);
