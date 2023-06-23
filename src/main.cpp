@@ -117,9 +117,6 @@ void checkForMessages() {
 
     send(reply, sizeof(reply));
   }
-
-  free(buf);
-  free(len);
 }
 
 void loop() {
