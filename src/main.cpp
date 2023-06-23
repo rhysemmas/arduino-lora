@@ -43,6 +43,8 @@ void send(uint8_t *message, size_t messageLen) {
   memcpy(data, message, messageLen);
 
   Serial.print(F("sending message: "));
+  digitalWrite(led, HIGH);
+
   for (uint8_t i = 0; i < messageLen; i++) {
     Serial.print((char)data[i]);
   }
@@ -50,14 +52,11 @@ void send(uint8_t *message, size_t messageLen) {
 
   rf95.send(data, sizeof(data));
   rf95.waitPacketSent();
+  digitalWrite(led, LOW);
 }
 
-void receive() {
+boolean receive(uint8_t *buf, uint8_t len) {
   if (rf95.available()) {
-    // Should be a message for us now
-    uint8_t buf[RH_RF95_MAX_MESSAGE_LEN] = {0};
-    uint8_t len = sizeof(buf);
-
     if (rf95.recv(buf, &len)) {
       digitalWrite(led, HIGH);
 
@@ -70,32 +69,49 @@ void receive() {
       Serial.print(F("snr: "));
       Serial.println(rf95.lastSNR());
 
-      // Send a reply
-      uint8_t reply[len + 20];
-      strcpy((char *)reply, (char *)buf);
-      strcat((char *)reply, " - no u");
-      send(reply, sizeof(reply));
-
       digitalWrite(led, LOW);
+
+      return true;
     } else {
       Serial.println(F("recv failed"));
     }
   }
+  return false;
 }
 
 void waitForReply() {
-  uint8_t buf[RH_RF95_MAX_MESSAGE_LEN] = {0};
-  uint8_t len = sizeof(buf);
+  uint8_t *buf = (uint8_t *)malloc(sizeof(uint8_t *) * RH_RF95_MAX_MESSAGE_LEN);
+  uint8_t len;
+  len = sizeof(buf);
 
   if (rf95.waitAvailableTimeout(10000)) {
-    receive();
+    receive(buf, len);
   } else {
     Serial.println(F("no reply, is anyone there?"));
   }
+
+  free(buf);
+}
+
+void checkForMessages() {
+  uint8_t *buf = (uint8_t *)malloc(sizeof(uint8_t *) * RH_RF95_MAX_MESSAGE_LEN);
+  uint8_t len;
+  len = sizeof(buf);
+
+  if (receive(buf, len)) {
+    // Send a reply
+    uint8_t reply[len + 7];
+    strcpy((char *)reply, (char *)buf);
+    strcat((char *)reply, " - no u");
+
+    send(reply, sizeof(reply));
+  }
+
+  free(buf);
 }
 
 void loop() {
-  receive();
+  checkForMessages();
 
   // If we have a message in our serial buffer, enter sending mode
   uint8_t buffer[RH_RF95_MAX_MESSAGE_LEN] = {0};
