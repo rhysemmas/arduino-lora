@@ -90,31 +90,26 @@ void waitForReply() {
   Serial.print(F("allocating size for buffer: "));
   Serial.println(sizeof(uint8_t) * RH_RF95_MAX_MESSAGE_LEN);
 
-  uint8_t *buf = (uint8_t *)malloc(sizeof(uint8_t) * RH_RF95_MAX_MESSAGE_LEN);
-  uint8_t *len = (uint8_t *)malloc(sizeof(uint8_t));
-
-  memset(buf, 0, sizeof(uint8_t) * RH_RF95_MAX_MESSAGE_LEN);
-  memset(len, 0, sizeof(uint8_t));
+  uint8_t len = sizeof(uint8_t) * RH_RF95_MAX_MESSAGE_LEN;
+  uint8_t *buf = (uint8_t *)malloc(len);
+  memset(buf, 0, len);
 
   if (rf95.waitAvailableTimeout(10000)) {
-    receive(buf, len);
+    receive(buf, &len);
   } else {
     Serial.println(F("no reply, is anyone there?"));
   }
 
   free(buf);
-  free(len);
 }
 
 void checkForMessages() {
-  uint8_t *buf = (uint8_t *)malloc(sizeof(uint8_t) * RH_RF95_MAX_MESSAGE_LEN);
-  uint8_t *len = (uint8_t *)malloc(sizeof(uint8_t));
+  uint8_t len = sizeof(uint8_t) * RH_RF95_MAX_MESSAGE_LEN;
+  uint8_t *buf = (uint8_t *)malloc(len);
+  memset(buf, 0, len);
 
-  memset(buf, 0, sizeof(uint8_t) * RH_RF95_MAX_MESSAGE_LEN);
-  memset(len, 0, sizeof(uint8_t));
-
-  if (receive(buf, len)) {
-    uint8_t reply[*len + 7];
+  if (receive(buf, &len)) {
+    uint8_t reply[len + 7];
     strcpy((char *)reply, (char *)buf);
     strcat((char *)reply, " - no u");
 
@@ -122,7 +117,6 @@ void checkForMessages() {
   }
 
   free(buf);
-  free(len);
 }
 
 void loop() {
