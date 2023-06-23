@@ -22,23 +22,16 @@ void setup() {
 
   rf95.setFrequency(frequency);
   rf95.setTxPower(20);
-  rf95.setPreambleLength(10);
-  rf95.setSpreadingFactor(12);
-  rf95.setSignalBandwidth(125000);
-  rf95.setCodingRate4(8);
-  rf95.setLowDatarate();
-  rf95.setPayloadCRC(false);
 
-  // if one feels like setting the registers manually:
+  // modem config resources:
   // https://cdn.sparkfun.com/assets/learn_tutorials/8/0/4/RFM95_96_97_98W.pdf
-  // e.g,
-  // RH_RF95::ModemConfig modem_config = {
-  //     0xc6, // Reg 0x1D: BW=62.5khz, Coding=4/8, Header=implicit
-  //     0xc4, // Reg 0x1E: Spread=4096chips/symbol, CRC=enable
-  //     0x0c  // Reg 0x26: LowDataRate=On, Agc=On
-  // };
-  // rf95.setModemRegisters(&modem_config);
-
+  // https://medium.com/home-wireless/testing-lora-radios-with-the-limesdr-mini-part-2-37fa481217ff
+  // rf95.setModemConfig(RH_RF95::Bw125Cr48Sf4096);
+  const RH_RF95::ModemConfig myProfile = {RH_RF95_BW_62_5KHZ |
+                                              RH_RF95_CODING_RATE_4_8,
+                                          RH_RF95_SPREADING_FACTOR_4096CPS};
+  rf95.setModemRegisters(&myProfile);
+  rf95.setLowDatarate();
   rf95.setPromiscuous(true);
   // rf95.setCADTimeout(10000);
 
