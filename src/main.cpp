@@ -21,87 +21,93 @@ void setup() {
   }
 
   rf95.setFrequency(frequency);
+  rf95.setTxPower(23);
   rf95.setModemConfig(RH_RF95::Bw125Cr48Sf4096);
-  // rf95.setModemConfig(RH_RF95::Bw500Cr45Sf128);
-  rf95.setTxPower(23, false);
-
-  // rf95.setCADTimeout(10000);
+  rf95.setLowDatarate();
   rf95.setPromiscuous(true);
+  // rf95.setCADTimeout(10000);
 
   Serial.print(F("max message length: "));
   Serial.println(rf95.maxMessageLength());
 }
 
-void sendMessage(uint8_t *message, size_t messageLen) {
+void send(uint8_t *message, size_t messageLen) {
   uint8_t data[messageLen];
   memcpy(data, message, messageLen);
 
+  digitalWrite(led, HIGH);
   Serial.print(F("sending message: "));
   for (uint8_t i = 0; i < messageLen; i++) {
     Serial.print((char)data[i]);
   }
   Serial.println();
 
+  Serial.print(F("size of message: "));
+  Serial.println(sizeof(data));
+
   rf95.send(data, sizeof(data));
   rf95.waitPacketSent();
+  digitalWrite(led, LOW);
+}
 
-  // Now wait for a reply
-  uint8_t buf[RH_RF95_MAX_MESSAGE_LEN] = {0};
-  uint8_t len = sizeof(buf);
+boolean receive(uint8_t *buf, uint8_t *len) {
+  if (rf95.available()) {
+    if (rf95.recv(buf, len)) {
+      digitalWrite(led, HIGH);
 
-  if (rf95.waitAvailableTimeout(10000)) {
-    // Should be a reply message for us now
-    if (rf95.recv(buf, &len)) {
-      Serial.print(F("got reply: "));
+      Serial.print(F("got message: "));
       Serial.println((char *)buf);
+
+      Serial.print(F("size of message: "));
+      Serial.println(*len);
 
       Serial.print(F("rssi: "));
       Serial.println(rf95.lastRssi());
 
       Serial.print(F("snr: "));
       Serial.println(rf95.lastSNR());
+
+      digitalWrite(led, LOW);
+
+      return true;
     } else {
       Serial.println(F("recv failed"));
     }
+  }
+  return false;
+}
+
+void waitForReply() {
+  uint8_t len = sizeof(uint8_t) * RH_RF95_MAX_MESSAGE_LEN;
+  uint8_t *buf = (uint8_t *)malloc(len);
+  memset(buf, 0, len);
+
+  Serial.println(F("waiting for reply..."));
+
+  if (rf95.waitAvailableTimeout(10000)) {
+    receive(buf, &len);
   } else {
     Serial.println(F("no reply, is anyone there?"));
   }
+
+  free(buf);
 }
 
 void checkForMessages() {
-  if (rf95.available()) {
-    // Should be a message for us now
-    uint8_t buf[RH_RF95_MAX_MESSAGE_LEN] = {0};
-    uint8_t len = sizeof(buf);
-    if (rf95.recv(buf, &len)) {
-      digitalWrite(led, HIGH);
+  uint8_t len = sizeof(uint8_t) * RH_RF95_MAX_MESSAGE_LEN;
+  uint8_t *buf = (uint8_t *)malloc(len);
+  memset(buf, 0, len);
 
-      // debug
-      // RH_RF95::printBuffer("request: ", buf, len);
+  // If we have a message, send a reply
+  if (receive(buf, &len)) {
+    uint8_t reply[len + 7];
+    strcpy((char *)reply, (char *)buf);
+    strcat((char *)reply, " - no u");
 
-      Serial.print(F("got request: "));
-      Serial.println((char *)buf);
-
-      Serial.print(F("rssi: "));
-      Serial.println(rf95.lastRssi());
-
-      Serial.print(F("snr: "));
-      Serial.println(rf95.lastSNR());
-
-      // Send a reply
-      uint8_t reply[len + 20];
-
-      strcpy((char *)reply, (char *)buf);
-      strcat((char *)reply, " - is what you said");
-
-      rf95.send(reply, sizeof(reply));
-      rf95.waitPacketSent();
-      Serial.println(F("sent a reply"));
-      digitalWrite(led, LOW);
-    } else {
-      Serial.println(F("recv failed"));
-    }
+    send(reply, sizeof(reply));
   }
+
+  free(buf);
 }
 
 void loop() {
@@ -113,12 +119,7 @@ void loop() {
   bufSize = Serial.readBytes(buffer, sizeof(buffer));
 
   if (bufSize > 0) {
-    Serial.print(F("read bytes: "));
-    Serial.println((char *)buffer);
-
-    Serial.print(F("num bytes read: "));
-    Serial.println(bufSize);
-
-    sendMessage(buffer, bufSize);
+    send(buffer, bufSize);
+    waitForReply();
   }
 }
