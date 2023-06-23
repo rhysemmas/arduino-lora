@@ -42,13 +42,15 @@ void send(uint8_t *message, size_t messageLen) {
   uint8_t data[messageLen];
   memcpy(data, message, messageLen);
 
-  Serial.print(F("sending message: "));
   digitalWrite(led, HIGH);
-
+  Serial.print(F("sending message: "));
   for (uint8_t i = 0; i < messageLen; i++) {
     Serial.print((char)data[i]);
   }
   Serial.println();
+
+  Serial.print(F("size of message: "));
+  Serial.println(sizeof(data));
 
   rf95.send(data, sizeof(data));
   rf95.waitPacketSent();
