@@ -21,7 +21,7 @@ void setup() {
   }
 
   rf95.setFrequency(frequency);
-  rf95.setTxPower(23, false);
+  rf95.setTxPower(20, false);
   rf95.setModemConfig(RH_RF95::Bw125Cr48Sf4096);
 
   // RH_RF95::ModemConfig modem_config = {
@@ -62,8 +62,6 @@ boolean receive(uint8_t *buf, uint8_t *len) {
     if (rf95.recv(buf, len)) {
       digitalWrite(led, HIGH);
 
-      rf95.printBuffer("receive buffer: ", buf, *len);
-
       Serial.print(F("got message: "));
       Serial.println((char *)buf);
 
@@ -87,12 +85,11 @@ boolean receive(uint8_t *buf, uint8_t *len) {
 }
 
 void waitForReply() {
-  Serial.print(F("allocating size for buffer: "));
-  Serial.println(sizeof(uint8_t) * RH_RF95_MAX_MESSAGE_LEN);
-
   uint8_t len = sizeof(uint8_t) * RH_RF95_MAX_MESSAGE_LEN;
   uint8_t *buf = (uint8_t *)malloc(len);
   memset(buf, 0, len);
+
+  Serial.println(F("waiting for reply..."));
 
   if (rf95.waitAvailableTimeout(10000)) {
     receive(buf, &len);
@@ -108,6 +105,7 @@ void checkForMessages() {
   uint8_t *buf = (uint8_t *)malloc(len);
   memset(buf, 0, len);
 
+  // If we have a message, send a reply
   if (receive(buf, &len)) {
     uint8_t reply[len + 7];
     strcpy((char *)reply, (char *)buf);
