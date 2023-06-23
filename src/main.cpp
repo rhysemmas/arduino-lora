@@ -33,7 +33,6 @@ void setup() {
 
   // rf95.setCADTimeout(10000);
   rf95.setPromiscuous(true);
-  rf95.printRegisters();
 
   Serial.print(F("max message length: "));
   Serial.println(rf95.maxMessageLength());
