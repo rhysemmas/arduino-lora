@@ -60,8 +60,11 @@ boolean receive(uint8_t *buf, uint8_t len) {
     if (rf95.recv(buf, &len)) {
       digitalWrite(led, HIGH);
 
-      Serial.print(F("got request: "));
+      Serial.print(F("got message: "));
       Serial.println((char *)buf);
+
+      Serial.print(F("size of message: "));
+      Serial.println(len);
 
       Serial.print(F("rssi: "));
       Serial.println(rf95.lastRssi());
@@ -99,7 +102,6 @@ void checkForMessages() {
   len = sizeof(buf);
 
   if (receive(buf, len)) {
-    // Send a reply
     uint8_t reply[len + 7];
     strcpy((char *)reply, (char *)buf);
     strcat((char *)reply, " - no u");
