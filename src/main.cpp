@@ -22,14 +22,14 @@ void setup() {
 
   rf95.setFrequency(frequency);
   rf95.setTxPower(20);
-  rf95.setModemConfig(RH_RF95::Bw125Cr48Sf4096);
+  // rf95.setModemConfig(RH_RF95::Bw125Cr48Sf4096);
 
-  // RH_RF95::ModemConfig modem_config = {
-  //     0x78, // Reg 0x1D: BW=125kHz, Coding=4/8, Header=explicit
-  //     0xc4, // Reg 0x1E: Spread=4096chips/symbol, CRC=enable
-  //     0x0c  // Reg 0x26: LowDataRate=On, Agc=On
-  // };
-  // rf95.setModemRegisters(&modem_config);
+  RH_RF95::ModemConfig modem_config = {
+      0x78, // Reg 0x1D: BW=125kHz, Coding=4/8, Header=explicit
+      0xc4, // Reg 0x1E: Spread=4096chips/symbol, CRC=enable
+      0x0c  // Reg 0x26: LowDataRate=On, Agc=On
+  };
+  rf95.setModemRegisters(&modem_config);
 
   // rf95.setCADTimeout(10000);
   rf95.setPromiscuous(true);
