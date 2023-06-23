@@ -101,6 +101,9 @@ void waitForReply() {
   } else {
     Serial.println(F("no reply, is anyone there?"));
   }
+
+  free(buf);
+  free(len);
 }
 
 void checkForMessages() {
@@ -117,6 +120,9 @@ void checkForMessages() {
 
     send(reply, sizeof(reply));
   }
+
+  free(buf);
+  free(len);
 }
 
 void loop() {
