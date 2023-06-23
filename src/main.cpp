@@ -24,7 +24,7 @@ void setup() {
   rf95.setTxPower(20);
   rf95.setPreambleLength(10);
   rf95.setSpreadingFactor(12);
-  rf95.setSignalBandwidth(62500);
+  rf95.setSignalBandwidth(125000);
   rf95.setCodingRate4(8);
   rf95.setLowDatarate();
   rf95.setPayloadCRC(false);
