@@ -122,6 +122,7 @@ void loop() {
     uint8_t rtsBuffer[4] = "RTS";
     send(rtsBuffer, 4);
     waitForReply();
+    delay(1000);
     // send a RTS
     // receive a CTS
     // send our message
