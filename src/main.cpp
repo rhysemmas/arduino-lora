@@ -119,7 +119,7 @@ void loop() {
   bufSize = Serial.readBytes(buffer, sizeof(buffer));
 
   if (bufSize > 0) {
-    uint8_t rtsBuffer[4] = {"RTS"};
+    uint8_t rtsBuffer[] = "RTS";
     send(rtsBuffer, sizeof(rtsBuffer));
     waitForReply();
     // send a RTS
