@@ -34,9 +34,12 @@ void setup() {
   Serial.println();
   uint8_t buffer[1] = {0};
   size_t bufSize = 0;
-  bufSize = Serial.readBytesUntil('\n', buffer, sizeof(buffer));
-  if (bufSize > 0) {
-    rf95.setHeaderFrom(buffer[0]);
+
+  if (Serial.available() > 0) {
+    bufSize = Serial.readBytesUntil('\n', buffer, sizeof(buffer));
+    if (bufSize > 0) {
+      rf95.setHeaderFrom(buffer[0]);
+    }
   }
 
   Serial.print(F("max message length: "));
@@ -137,9 +140,13 @@ void loop() {
 
     uint8_t buf[1] = {0};
     size_t bufS = 0;
-    bufS = Serial.readBytesUntil('\n', buf, sizeof(buf));
-    if (bufS > 0) {
-      rf95.setHeaderTo(buf[0]);
+    if (Serial.available() > 0) {
+      bufS = Serial.readBytesUntil('\n', buf, sizeof(buf));
+      if (bufS > 0) {
+        rf95.setHeaderTo(buf[0]);
+        Serial.print(F("sending message to: "));
+        Serial.println(buf[0]);
+      }
     }
     send(buffer, bufSize);
     waitForReply();
