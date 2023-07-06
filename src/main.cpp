@@ -37,8 +37,9 @@ void setup() {
   uint8_t buffer[1] = {0};
   size_t bufSize = 0;
   bufSize = Serial.readBytes(buffer, sizeof(buffer));
-  if (bufSize > 0)
+  if (bufSize > 0) {
     rf95.setHeaderFrom(buffer[0]);
+  }
 }
 
 void send(uint8_t *message, size_t messageLen) {
@@ -129,8 +130,6 @@ void loop() {
   bufSize = Serial.readBytes(buffer, sizeof(buffer));
 
   if (bufSize > 0) {
-<<<<<<< Updated upstream
-=======
     // get TO header
     Serial.print(F("enter recipient ID: "));
     Serial.println();
@@ -138,10 +137,9 @@ void loop() {
     uint8_t buf[1] = {0};
     size_t bufS = 0;
     bufS = Serial.readBytes(buf, sizeof(buf));
-    if (bufS > 0)
+    if (bufS > 0) {
       rf95.setHeaderTo(buf[0]);
-
->>>>>>> Stashed changes
+    }
     send(buffer, bufSize);
     waitForReply();
   }
