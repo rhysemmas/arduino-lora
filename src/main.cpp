@@ -112,6 +112,8 @@ void checkForMessages() {
     strcpy((char *)reply, (char *)buf);
     strcat((char *)reply, " - no u");
 
+    Serial.print("got message from node ID: ");
+    Serial.println(rf95.headerFrom());
     send(reply, sizeof(reply));
   }
 
@@ -128,20 +130,24 @@ void loop() {
 
   if (bufSize > 0) {
     // get TO header
-    // TODO: how to make this block until someone has entered node ID?
     Serial.print(F("enter recipient ID: "));
     Serial.println();
 
-    uint8_t buf[1] = {0};
-    size_t bufS = 0;
-    if (Serial.available() > 0) {
-      bufS = Serial.readBytesUntil('\n', buf, sizeof(buf));
-      if (bufS > 0) {
-        rf95.setHeaderTo(buf[0]);
-        Serial.print(F("sending message to: "));
-        Serial.println(buf[0]);
-      }
+    uint8_t toBuf[1] = {0};
+    size_t toBufSize = 0;
+
+    // Wait for user to input TO node ID
+    while (Serial.available() == 0) {
+      ;
     }
+
+    toBufSize = Serial.readBytesUntil('\n', toBuf, sizeof(toBuf));
+    if (toBufSize > 0) {
+      rf95.setHeaderTo(toBuf[0]);
+      Serial.print(F("sending message to: "));
+      Serial.println(toBuf[0]);
+    }
+
     send(buffer, bufSize);
     waitForReply();
   }
