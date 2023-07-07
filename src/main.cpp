@@ -34,6 +34,7 @@ void setup() {
   uint8_t nodeID = EEPROM.read(0);
   Serial.print(F("read nodeId: "));
   Serial.println(nodeID);
+  rf95.setHeaderFrom(nodeID);
 
   Serial.print(F("max message length: "));
   Serial.println(rf95.maxMessageLength());
@@ -145,6 +146,7 @@ void loop() {
     toBufSize = Serial.readBytesUntil('\n', &to, sizeof(to));
     if (toBufSize > 0) {
       rf95.setHeaderTo(to);
+      // TODO: getting random number? 1= 49
       Serial.print(F("sending message to: "));
       Serial.println(to);
     }
