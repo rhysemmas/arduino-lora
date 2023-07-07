@@ -66,6 +66,9 @@ boolean receive(uint8_t *buf, uint8_t *len) {
       Serial.print(F("got message: "));
       Serial.println((char *)buf);
 
+      Serial.print("got message from node ID: ");
+      Serial.println(rf95.headerFrom());
+
       Serial.print(F("size of message: "));
       Serial.println(*len);
 
@@ -112,8 +115,6 @@ void checkForMessages() {
     strcpy((char *)reply, (char *)buf);
     strcat((char *)reply, " - no u");
 
-    Serial.print("got message from node ID: ");
-    Serial.println(rf95.headerFrom());
     send(reply, sizeof(reply));
   }
 
@@ -133,7 +134,7 @@ void loop() {
     Serial.print(F("enter recipient ID: "));
     Serial.println();
 
-    uint8_t toBuf[1] = {0};
+    uint8_t to;
     size_t toBufSize = 0;
 
     // Wait for user to input TO node ID
@@ -141,11 +142,11 @@ void loop() {
       ;
     }
 
-    toBufSize = Serial.readBytesUntil('\n', toBuf, sizeof(toBuf));
+    toBufSize = Serial.readBytesUntil('\n', &to, sizeof(to));
     if (toBufSize > 0) {
-      rf95.setHeaderTo(toBuf[0]);
+      rf95.setHeaderTo(to);
       Serial.print(F("sending message to: "));
-      Serial.println(toBuf[0]);
+      Serial.println(to);
     }
 
     send(buffer, bufSize);
