@@ -38,6 +38,8 @@ The project uses [PlatformIO](https://docs.platformio.org/en/latest/integration/
 
 ### Running
 
+Flash node ID for new member before starting: https://github.com/rhysemmas/arduino-lora-node-id
+
 PlatformIO includes tools to build and upload code to the Arduino Uno. You can also use it to open a serial monitor to the device from the CLI with `pio device monitor` 
 
 With the monitor attached, you can send messages to any other listening arduino-lora nodes!
