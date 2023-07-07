@@ -15,8 +15,9 @@ uint8_t led = LED_BUILTIN;
 
 void setup() {
   Serial.begin(9600);
-  while (!Serial)
+  while (!Serial) {
     ; // Wait for serial port to be available
+  }
 
   if (!rf95.init()) {
     Serial.println(F("init failed"));
@@ -34,6 +35,11 @@ void setup() {
   Serial.println();
   uint8_t buffer[1] = {0};
   size_t bufSize = 0;
+
+  // TODO: how to make this block until someone has entered node ID?
+  while (Serial.available() == 0) {
+    ; // Wait for there to be serial data available
+  }
 
   if (Serial.available() > 0) {
     bufSize = Serial.readBytesUntil('\n', buffer, sizeof(buffer));
@@ -135,6 +141,7 @@ void loop() {
 
   if (bufSize > 0) {
     // get TO header
+    // TODO: how to make this block until someone has entered node ID?
     Serial.print(F("enter recipient ID: "));
     Serial.println();
 
