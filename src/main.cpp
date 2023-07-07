@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <EEPROM.h>
 #include <RH_RF95.h>
 #include <SPI.h>
 
@@ -30,23 +31,9 @@ void setup() {
   rf95.setPromiscuous(true);
   // rf95.setCADTimeout(10000);
 
-  // set this node's ID
-  Serial.print(F("enter node ID: "));
-  Serial.println();
-  uint8_t buffer[1] = {0};
-  size_t bufSize = 0;
-
-  // TODO: how to make this block until someone has entered node ID?
-  while (Serial.available() == 0) {
-    ; // Wait for there to be serial data available
-  }
-
-  if (Serial.available() > 0) {
-    bufSize = Serial.readBytesUntil('\n', buffer, sizeof(buffer));
-    if (bufSize > 0) {
-      rf95.setHeaderFrom(buffer[0]);
-    }
-  }
+  uint8_t nodeID = EEPROM.read(0);
+  Serial.print(F("read nodeId: "));
+  Serial.println(nodeID);
 
   Serial.print(F("max message length: "));
   Serial.println(rf95.maxMessageLength());
