@@ -1,6 +1,9 @@
 #include <Arduino.h>
+#include <EEPROM.h>
 #include <RH_RF95.h>
 #include <SPI.h>
+
+#include "packet.cpp"
 
 // Singleton instance of the radio driver
 RH_RF95 rf95;
@@ -13,8 +16,9 @@ uint8_t led = LED_BUILTIN;
 
 void setup() {
   Serial.begin(9600);
-  while (!Serial)
+  while (!Serial) {
     ; // Wait for serial port to be available
+  }
 
   if (!rf95.init()) {
     Serial.println(F("init failed"));
@@ -26,6 +30,11 @@ void setup() {
   rf95.setLowDatarate();
   rf95.setPromiscuous(true);
   // rf95.setCADTimeout(10000);
+
+  uint8_t nodeID = EEPROM.read(0);
+  Serial.print(F("read nodeId: "));
+  Serial.println(nodeID);
+  rf95.setHeaderFrom(nodeID);
 
   Serial.print(F("max message length: "));
   Serial.println(rf95.maxMessageLength());
@@ -57,6 +66,9 @@ boolean receive(uint8_t *buf, uint8_t *len) {
 
       Serial.print(F("got message: "));
       Serial.println((char *)buf);
+
+      Serial.print("got message from node ID: ");
+      Serial.println(rf95.headerFrom());
 
       Serial.print(F("size of message: "));
       Serial.println(*len);
@@ -116,9 +128,29 @@ void loop() {
   // If we have a message in our serial buffer, enter sending mode
   uint8_t buffer[RH_RF95_MAX_MESSAGE_LEN] = {0};
   size_t bufSize = 0;
-  bufSize = Serial.readBytes(buffer, sizeof(buffer));
+  bufSize = Serial.readBytesUntil('\n', buffer, sizeof(buffer));
 
   if (bufSize > 0) {
+    // get TO header
+    Serial.print(F("enter recipient ID: "));
+    Serial.println();
+
+    uint8_t to;
+    size_t toBufSize = 0;
+
+    // Wait for user to input TO node ID
+    while (Serial.available() == 0) {
+      ;
+    }
+
+    toBufSize = Serial.readBytesUntil('\n', &to, sizeof(to));
+    if (toBufSize > 0) {
+      rf95.setHeaderTo(to);
+      // TODO: getting random number? 1= 49
+      Serial.print(F("sending message to: "));
+      Serial.println(to);
+    }
+
     send(buffer, bufSize);
     waitForReply();
   }
